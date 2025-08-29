@@ -12,6 +12,3 @@ def continuar():
     input("Pressione Enter para continuar...")               
     limpar_tela()
 
-def parar_operacao():
-    input("Operação cancelada. Pressione Enter para continuar...")
-    limpar_tela()

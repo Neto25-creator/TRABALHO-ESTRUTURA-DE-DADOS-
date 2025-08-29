@@ -1,10 +1,14 @@
 import os, time
-from funcoes import limpar_tela, sair, continuar, parar_operacao
+from funcoes import limpar_tela, sair, continuar
 from collections import deque
-os.system("cls" if os.name == "nt" else "clear") #para testar no mac
+limpar_tela()
 
 class Produto:
+    _id_counter = 1
+
     def __init__(self, nome, preco, quantidade):
+        self.id = Produto._id_counter
+        Produto._id_counter += 1
         self.nome = nome
         self.preco = preco
         self.quantidade = quantidade
@@ -15,27 +19,40 @@ class Produto:
             return False
         self.quantidade -= quantidade_vendida
         print(f"Estoque de {self.nome} atualizado. Quantidade restante: {self.quantidade}.")
-        salvar_produtos(lista_produtos)  # salva sempre que mexe no estoque
+        salvar_produtos(lista_produtos)
         return True
-
 
 def salvar_produtos(produtos, arquivo="produtos.txt"):
     with open(arquivo, "w", encoding="utf-8") as f:
         for p in produtos:
-            f.write(f"{p.nome};{p.preco};{p.quantidade}\n")
+            f.write(f"{p.id};{p.nome};{p.preco};{p.quantidade}\n")
 
 def carregar_produtos(arquivo="produtos.txt"):
     produtos = []
+    max_id = 0
     if os.path.exists(arquivo):
         with open(arquivo, "r", encoding="utf-8") as f:
             for linha in f:
-                nome, preco, quantidade = linha.strip().split(";")
-                produtos.append(Produto(nome, float(preco), int(quantidade)))
+                partes = linha.strip().split(";")
+                if len(partes) == 4:
+                    id_str, nome, preco, quantidade = partes
+                    produto = Produto(nome, float(preco), int(quantidade))
+                    produto.id = int(id_str)
+                    produtos.append(produto)
+                    max_id = max(max_id, produto.id)
+                elif len(partes) == 3:
+                    nome, preco, quantidade = partes
+                    produto = Produto(nome, float(preco), int(quantidade))
+                    produtos.append(produto)
+    Produto._id_counter = max_id + 1
     return produtos
 
-
 class Cliente:
+    _id_counter = 1
+
     def __init__(self, nome):
+        self.id = Cliente._id_counter
+        Cliente._id_counter += 1
         self.nome = nome
         self.historico_compras = []
         self.total_gasto = 0.0
@@ -46,7 +63,6 @@ class Cliente:
         print(f"Compra de {produto} no valor de R${valor:.2f} adicionada ao histórico de {self.nome}.")
         continuar()
         limpar_tela()
-
 
 class Venda:
     def __init__(self, cliente, produto, quantidade):
@@ -65,8 +81,6 @@ class Venda:
             print("Venda não processada devido a problemas no estoque. Voltando...")
             continuar()
             limpar_tela()
-
-
 
 opcoes = {
     1: "Cadastrar Cliente",
@@ -88,10 +102,9 @@ lista_clientes = [
     Cliente("Carlos")
 ]
 
-lista_produtos = carregar_produtos()  # carrega os produtos do arquivo
+lista_produtos = carregar_produtos()
 fila_vendas = deque()
 pilha_operacoes = []
-
 
 def registrar_operacao(tipo, objeto):
     pilha_operacoes.append((tipo, objeto))
@@ -111,7 +124,7 @@ def desfazer_ultima_operacao():
 
     elif tipo == "produto":
         lista_produtos.remove(objeto)
-        salvar_produtos(lista_produtos)  # atualiza o arquivo
+        salvar_produtos(lista_produtos)
         print(f"Desfeito: produto {objeto.nome} removido.")
 
     elif tipo == "venda_fila":
@@ -123,13 +136,11 @@ def desfazer_ultima_operacao():
         objeto.cliente.total_gasto -= objeto.valor_total
         if objeto.cliente.historico_compras:
             objeto.cliente.historico_compras.pop()
-        salvar_produtos(lista_produtos)  # atualiza o estoque no arquivo
+        salvar_produtos(lista_produtos)
         print(f"Desfeito: venda de {objeto.produto.nome} para {objeto.cliente.nome} revertida.")
 
     continuar()
     limpar_tela()
-
-
 
 def visualizar_fila_vendas(fila):
     if not fila_vendas:
@@ -139,8 +150,6 @@ def visualizar_fila_vendas(fila):
     print("-" * 65)
     for i, v in enumerate(fila, 1):
         print(f"{i:<4}{v.cliente.nome:<20}{v.produto.nome:<20}{v.quantidade:<5}{v.valor_total:>12.2f}")
-
-
 
 tam = 55
 while True:
@@ -159,16 +168,14 @@ while True:
         continue
 
     if operacao == 0:
-        salvar_produtos(lista_produtos)  
+        salvar_produtos(lista_produtos)
         limpar_tela()
         break
 
-   
     if operacao == 1:
         limpar_tela()
         while True:
             nome = input("Digite o nome do cliente: ")
-            # Verifica se já existe um cliente com esse nome
             if any(cliente.nome == nome for cliente in lista_clientes):
                 print("Este cliente já está cadastrado!\n")
                 continuar()
@@ -177,7 +184,7 @@ while True:
                 if opcao == "0":
                     sair()
                     break
-                continue  # Volta para cadastrar outro nome 
+                continue
             novo_cliente = Cliente(nome)
             lista_clientes.append(novo_cliente)
             registrar_operacao("cliente", novo_cliente)
@@ -188,18 +195,18 @@ while True:
             if opcao == "0":
                 sair()
                 break
-    
+
     if operacao == 2:
-            limpar_tela()
-            for cliente in lista_clientes:
-                print(f"Nome: {cliente.nome}, Total Gasto: R${cliente.total_gasto:.2f}")
-            print("\n")
-            if not lista_clientes:
-                print("Nenhum cliente cadastrado.\n")
-            continuar()
-            limpar_tela()
-            sair()
-    
+        limpar_tela()
+        for cliente in lista_clientes:
+            print(f"ID: {cliente.id}, Nome: {cliente.nome}, Total Gasto: R${cliente.total_gasto:.2f}")
+        print("\n")
+        if not lista_clientes:
+            print("Nenhum cliente cadastrado.\n")
+        continuar()
+        limpar_tela()
+        sair()
+
     if operacao == 3:
         while True:
             if not lista_clientes:
@@ -215,9 +222,9 @@ while True:
 
             print("Clientes Disponíveis:")
             for idx, cliente in enumerate(lista_clientes):
-                print(f"{idx + 1}. {cliente.nome}")
+                print(f"{idx + 1}. {cliente.nome} (ID: {cliente.id})")
             cliente_idx = int(input("Selecione o número do cliente (0 para voltar): ")) - 1
-            if cliente_idx == -1:  # usuário digitou 0
+            if cliente_idx == -1:
                 limpar_tela()
                 break
             if cliente_idx < 0 or cliente_idx >= len(lista_clientes):
@@ -229,7 +236,7 @@ while True:
 
             print("\nProdutos Disponíveis:")
             for idx, produto in enumerate(lista_produtos):
-                print(f"{idx + 1}. {produto.nome} - Preço: R${produto.preco:.2f}, Quantidade em Estoque: {produto.quantidade}")
+                print(f"{idx + 1}. {produto.nome} (ID: {produto.id}) - Preço: R${produto.preco:.2f}, Quantidade em Estoque: {produto.quantidade}")
             produto_idx = int(input("Selecione o número do produto (0 para voltar): ")) - 1
             if produto_idx == -1:
                 limpar_tela()
@@ -260,19 +267,18 @@ while True:
             destino = input("Digite 'f' para adicionar à FILA ou pressione Enter para processar agora: ").strip().lower()
             if destino == 'f':
                 fila_vendas.append(venda)
-                registrar_operacao("venda_fila", venda) 
+                registrar_operacao("venda_fila", venda)
                 print("Venda adicionada à fila de vendas pendentes.")
                 continuar()
                 limpar_tela()
             else:
                 venda.processar_venda()
-                registrar_operacao("venda_realizada" , venda)
+                registrar_operacao("venda_realizada", venda)
 
             opcao = input("Deseja realizar outra venda? (s/n): ").lower()
             if opcao != "s":
                 limpar_tela()
                 break
-
 
     if operacao == 4:
         while True:
@@ -300,7 +306,7 @@ while True:
                     time.sleep(2)
                     limpar_tela()
                     continue
-                
+
                 while fila_vendas:
                     venda_pendente = fila_vendas.popleft()
                     venda_pendente.processar_venda()
@@ -318,10 +324,8 @@ while True:
                 time.sleep(2)
                 limpar_tela()
 
-   
-    if operacao == 5:    
+    if operacao == 5:
         desfazer_ultima_operacao()
-                
 
     if operacao == 6:
         limpar_tela()
@@ -339,8 +343,26 @@ while True:
                 print("Este produto já está cadastrado!\n")
                 time.sleep(1)
                 continue
-            preco = float(input("Digite o preço do produto: "))
-            quantidade = int(input("Digite a quantidade do produto: "))
+            try:
+                preco = float(input("Digite o preço do produto: "))
+                if preco <= 0:
+                    print("O preço deve ser um número positivo!\n")
+                    time.sleep(2)
+                    continue
+            except ValueError:
+                print("Preço inválido! Digite apenas números positivos.\n")
+                time.sleep(2)
+                continue
+            try:
+                quantidade = int(input("Digite a quantidade do produto: "))
+                if quantidade <= 0:
+                    print("A quantidade deve ser um número inteiro positivo!\n")
+                    time.sleep(2)
+                    continue
+            except ValueError:
+                print("Quantidade inválida! Digite apenas números inteiros positivos.\n")
+                time.sleep(2)
+                continue
             novo_produto = Produto(nome, preco, quantidade)
             lista_produtos.append(novo_produto)
             registrar_operacao("produto", novo_produto)
@@ -351,16 +373,16 @@ while True:
                 limpar_tela()
                 sair()
                 break
-        
+
     if operacao == 8:
         limpar_tela()
         for produto in lista_produtos:
-            print(f"Nome: {produto.nome}, Preço: R${produto.preco:.2f}, Quantidade: {produto.quantidade}")
+            print(f"ID: {produto.id}, Nome: {produto.nome}, Preço: R${produto.preco:.2f}, Quantidade: {produto.quantidade}")
         print("\n")
         continuar()
         limpar_tela()
         sair()
-        
+
     if operacao == 9:
         limpar_tela()
         valor_total_estoque = sum(produto.preco * produto.quantidade for produto in lista_produtos)
@@ -373,25 +395,29 @@ while True:
         continue
     print(f"{opcoes.get(operacao)}\n")
 
-
     if operacao == 10:
         while True:
             limpar_tela()
-            termo_busca = input("Digite o nome do produto para buscar ou 0 para sair: ").strip().lower()
+            termo_busca = input("Digite o nome ou ID do produto para buscar ou 0 para sair: ").strip().lower()
             if termo_busca == "0":
                 limpar_tela()
                 sair()
-                break     
-            produtos_encontrados = [p for p in lista_produtos if termo_busca in p.nome.lower()]
-            if produtos_encontrados:
-                print(f"{'Nome':<20}{'Preço (R$)':<15}{'Quantidade':<10}")
-                print("-" * 45)
-                for produto in produtos_encontrados:
-                    print(f"{produto.nome:<20}{produto.preco:<15.2f}{produto.quantidade:<10}")
+                break
+            produtos_encontrados = []
+            if termo_busca.isdigit():
+                id_busca = int(termo_busca)
+                produtos_encontrados = [p for p in lista_produtos if p.id == id_busca]
             else:
-                print("Nenhum produto encontrado com esse nome.\n")
+                produtos_encontrados = [p for p in lista_produtos if termo_busca in p.nome.lower()]
+            if produtos_encontrados:
+                print(f"{'ID':<5}{'Nome':<20}{'Preço (R$)':<15}{'Quantidade':<10}")
+                print("-" * 55)
+                for produto in produtos_encontrados:
+                    print(f"{produto.id:<5}{produto.nome:<20}{produto.preco:<15.2f}{produto.quantidade:<10}")
+            else:
+                print("Nenhum produto encontrado com esse nome ou ID.\n")
                 continuar()
-                continue 
+                continue
             continuar()
             limpar_tela()
             sair()
