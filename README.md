@@ -91,10 +91,9 @@ O sistema apresenta um **menu interativo** no terminal que permite cadastrar cli
 
 Nomes: 
 
-Enio Muliterno Neto - 1138165
-Murilo Trevisol Dalmolin - 1138129
-Artur Machado Ibañez - 1137674
-Naubert Piva - 1138130
-Ricardo Pereira Drews - 1138128
-
-Tino Navarro - 1138028
+- Enio Muliterno Neto - 1138165
+- Murilo Trevisol Dalmolin - 1138129
+- Artur Machado Ibañez - 1137674
+- Naubert Piva - 1138130
+- Ricardo Pereira Drews - 1138128
+- Tino Navarro - 1138028
