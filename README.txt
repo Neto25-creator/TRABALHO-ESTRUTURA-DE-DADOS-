@@ -1,4 +1,4 @@
-# 📖 Sistema de Gestão de Vendas e Estoque
+#📖 Sistema de Gestão de Vendas e Estoque
 
 ## 📌 Descrição
 Este projeto é um **sistema de gerenciamento de vendas, clientes e produtos**, desenvolvido em **Python**.  
@@ -96,4 +96,5 @@ Murilo Trevisol Dalmolin - 1138129
 Artur Machado Ibañez - 1137674
 Naubert Piva - 1138130
 Ricardo Pereira Drews - 1138128
+
 Tino Navarro - 1138028
