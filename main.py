@@ -151,14 +151,14 @@ def visualizar_fila_vendas(fila):
     for i, v in enumerate(fila, 1):
         print(f"{i:<4}{v.cliente.nome:<20}{v.produto.nome:<20}{v.quantidade:<5}{v.valor_total:>12.2f}")
 
-tam = 55
+tamanho_menu = 50
 while True:
-    print(f"+{'-' * tam}+")
-    print(f"|{'MENU':^{tam}}|")
-    print(f"+{'-' * tam}+")
+    print(f"+{'-' * tamanho_menu}+")
+    print(f"|{'MENU':^{tamanho_menu}}|")
+    print(f"+{'-' * tamanho_menu}+")
     for k, v in opcoes.items():
-        print(f"| {k} - {v:<{50}}|")
-    print(f"+{'-' * tam}+")
+        print(f"| {k:>2} - {v:<44}|")
+    print(f"+{'-' * tamanho_menu}+")
     try:
         operacao = int(input("Escolha uma opção: "))
     except ValueError:
@@ -176,6 +176,10 @@ while True:
         limpar_tela()
         while True:
             nome = input("Digite o nome do cliente: ")
+            if not nome:
+                print("O nome do cliente não pode ser vazio!\n")
+                time.sleep(2)
+                continue
             if any(cliente.nome == nome for cliente in lista_clientes):
                 print("Este cliente já está cadastrado!\n")
                 continuar()
@@ -339,7 +343,11 @@ while True:
         while True:
             limpar_tela()
             nome = input("Digite o nome do produto: ")
-            if any(produto.nome == nome for produto in lista_produtos):
+            if not nome:
+                print("O nome do produto não pode ser vazio!\n")
+                time.sleep(2)
+                continue
+            if any(produto.nome.lower() == nome.lower() for produto in lista_produtos):
                 print("Este produto já está cadastrado!\n")
                 time.sleep(1)
                 continue
@@ -365,6 +373,7 @@ while True:
                 continue
             novo_produto = Produto(nome, preco, quantidade)
             lista_produtos.append(novo_produto)
+            salvar_produtos(lista_produtos)
             registrar_operacao("produto", novo_produto)
             print("O produto foi cadastrado com sucesso!\n")
             opcao = input("Pressione Enter para tentar novamente ou 0 para sair: ")
