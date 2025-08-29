@@ -168,7 +168,6 @@ while True:
         continue
 
     if operacao == 0:
-        salvar_produtos(lista_produtos)
         limpar_tela()
         break
 

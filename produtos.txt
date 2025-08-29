@@ -3,3 +3,4 @@
 3;teclado;100.0;47
 4;monitor;700.0;10
 5;MousePad;55.0;35
+
